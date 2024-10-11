@@ -1,0 +1,42 @@
+#Install.packages("pacman")#en dado caso de no tener instalados los paquetes
+#Creador: Isabel Pérez
+#Ejercicio: Análisis de miRNAs (estabilizador de genes)
+library(pacman)
+p_load("dplyr",
+       "ggplot2",
+       "readr")
+base_datos <- read.csv(file="https://raw.githubusercontent.com/ManuelLaraMVZ/Transcript-mica/main/Datos%20completos%20miRNAs%20ejercicio.csv")
+#View(base_datos)  si quitas simbolo de gato se abre la tabla
+head(base_datos)
+Controles <- base_datos %>% 
+  filter(Type=="Selected Control") %>% 
+  select(-Type)
+Controles
+Promedio_Controles <- Controles %>% 
+  mutate(Prom_Tx=(T1+T2+T3)/3,
+         Prom_Cx=(C1+C2+C3)/3) %>% 
+  select(-2,-3,-4,-5,-6,-7) %>% 
+  filter(miRNA=="U6 snRNA")
+Promedio_Controles
+
+Gen_Interes <- base_datos %>% 
+  filter(Type=="Target") %>% 
+  select(-Type)
+Gen_Interes
+
+Promedio_Genes <- Gen_Interes %>% 
+  mutate(Prom_Tx=(T1+T2+T3)/3,
+         Prom_Cx=(C1+C2+C3)/3) %>% 
+  select(1,8,9)
+Promedio_Genes
+head(Promedio_Genes)
+
+
+Analisis <- Promedio_Genes %>% 
+  mutate(DCT_Cx=Promedio_Genes$Prom_Cx-Promedio_Controles$Prom_Cx,
+         DCT_Tx=Promedio_Genes$Prom_Tx-Promedio_Controles$Prom_Tx,
+         dosDCT_Cx=2^-(DCT_Cx),
+         dosDCT_Tx=2^-(DCT_Tx),
+         dosDDCT=dosDCT_Tx/dosDCT_Cx)
+Analisis
+head(Analisis)
